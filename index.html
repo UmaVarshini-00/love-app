@@ -1,0 +1,378 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Love App ❤️</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Segoe UI;
+            background: black;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+        }
+
+            body::before {
+                content: "";
+                position: fixed;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle,#ff4d6d,black);
+                animation: bg 10s infinite alternate;
+                z-index: -1;
+            }
+
+        @keyframes bg {
+            from {
+                transform: translate(-10%,-10%)
+            }
+
+            to {
+                transform: translate(10%,10%)
+            }
+        }
+
+        /* Lock screen */
+        #lock {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        /* Stories */
+        .story {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: 1s;
+            padding: 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        button {
+            padding: 12px 22px;
+            font-size: 18px;
+            border: none;
+            border-radius: 30px;
+            background: #ff4d6d;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btns {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .chat {
+            background: #111;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .msg {
+            background: #ff4d6d;
+            padding: 8px 12px;
+            border-radius: 15px;
+            margin: 6px;
+        }
+
+        .gallery .glow-box {
+            display: inline-block;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #ff4d6d, 0 0 40px #ff4d6d, 0 0 60px #ff4d6d;
+            transition: box-shadow 0.3s;
+        }
+
+            .gallery .glow-box img {
+                width: 300px;
+                border-radius: 15px;
+            }
+
+        .love-note {
+            margin-top: 20px;
+            padding: 15px 25px;
+            border-radius: 15px;
+            background: rgba(255, 77, 109, 0.2);
+            color: #ff4d6d;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 15px #ff4d6d;
+            transition: opacity 0.5s ease;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        #ring {
+            font-size: 90px;
+            cursor: pointer;
+            transition: 1s;
+        }
+
+        .open {
+            transform: scale(1.5) rotateY(180deg);
+        }
+
+        .heart {
+            position: fixed;
+            font-size: 22px;
+            animation: fly 2s linear forwards;
+        }
+
+        @keyframes fly {
+            to {
+                transform: translateY(-200px);
+                opacity: 0
+            }
+        }
+
+        #no {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOCK -->   
+    <div id="lock">
+        <h2>Enter our love code 💖</h2>
+        <input id="pass" placeholder="Hint: your favourite word">
+        <br><br>
+        <button onclick="unlock()">Unlock</button>
+    </div>
+
+    <audio id="music" loop>
+        <source src="song/Thousand Years.mp3">
+    </audio>
+
+    <!-- STORIES -->
+    <div class="story">
+        <h1>Our Journey ❤️</h1>
+        <p id="days"></p>
+        <div id="loveNote" class="love-note"></div><br />
+        <button onclick="next()">Next ➡️</button>
+    </div>
+
+    <div class="story">
+        <h1>Our Chat 💬</h1>
+        <div class="chat" id="chat"></div><br />
+        <button onclick="next()">Next ➡️</button>
+    </div>
+
+    <div class="story gallery">
+        <h1>Memories 📸</h1>
+        <div class="glow-box">
+            <img id="pic" src="pics/1.jpeg" alt="Memory">
+        </div><br />
+        <button onclick="next()">Next ➡️</button>
+    </div>
+
+    <div class="story">
+        <h1>Do you love me? 😘</h1>
+        <div class="btns">
+            <button onclick="yesLove()">Yes 💕</button>
+            <button id="no" onmouseover="run()">No 😜</button>
+        </div>
+    </div>
+
+    <div class="story">
+        <h1>One Last Question 💍</h1>
+        <div id="ring" onclick="openRing()">💍</div>
+        <h2 id="final" style="display:none"></h2>
+    </div>
+
+    <script>
+        let stories = document.querySelectorAll(".story");
+        let index = -1;
+        let chatTimer = null;
+        let galleryTimer = null;
+        let daysInterval = null;
+
+        function unlock() {
+            const password = document.getElementById("pass").value;
+            if (password === "Azhagu Ranii") {
+                Swal.fire("Welcome ❤️", "Surprise waiting!", "success")
+                    .then(() => {
+                        document.getElementById("lock").style.display = "none";
+                        document.getElementById("music").play();
+
+                        const loveNotes = [
+                            `Hi my dear Orange 🍊💛,
+
+                             I’m happy to say this — Happy Valentine’s Day 💝🌹
+                             But honestly, for me, it feels like just another day 🌷,
+                             because every day with you already feels special ✨💞
+
+                             So today isn’t more special than the others—
+                             you make my ordinary days feel magical 🪄💫
+
+                             Thank you for coming into my life 🚶‍♂️➡️❤️
+                             and coloring it in ways I never knew I needed 🎨🌈
+
+                             I love you ❤️
+                             I purple you 💜
+                             I orange you 🧡🍊
+
+                             Hey my man 😘,
+
+                             here’s my little surprise for you 🎁💌
+                             I hope it makes you smile 😊💖`
+                        ];
+
+
+                        const daysEl = document.getElementById("days");
+                        const noteEl = document.getElementById("loveNote");
+                        let noteIndex = 0;
+
+                        // Days counter
+                        const meet = new Date("2025-11-24");
+                        daysInterval = setInterval(() => {
+                            daysEl.innerText =
+                                Math.floor((new Date() - meet) / (1000 * 60 * 60 * 24)) + " days together ❤️";
+                        }, 1000);
+
+                        // Love note rotation
+                        noteEl.innerText = loveNotes[noteIndex];
+                        setInterval(() => {
+                            noteIndex = (noteIndex + 1) % loveNotes.length;
+                            noteEl.style.opacity = 1;
+                            setTimeout(() => {
+                                noteEl.innerText = loveNotes[noteIndex];
+                                noteEl.style.opacity = 1;
+                            }, 500);
+                        }, 5000);
+
+                        next(); // start first story
+                    });
+            } else {
+                Swal.fire("Oops 😜", "Wrong code!", "error");
+            }
+        }
+
+        function show(i) {
+            stories.forEach(s => s.classList.remove("active"));
+            stories[i].classList.add("active");
+
+            // Chat story
+            if (i === 1) startChat();
+
+            // Gallery story
+            if (i === 2) startGallery();
+            else clearInterval(galleryTimer);
+        }
+
+        function next() {
+            if (index < stories.length - 1) {
+                index++;
+                show(index);
+            }
+        }
+
+        function startChat() {
+            const chat = document.getElementById("chat");
+            chat.innerHTML = "";
+            const msgs = ["Hi my love ❤️", "You are my favorite orange 🥰", "I purple you 💕", "Forever yours 💖"];
+            let mi = 0;
+
+            function flow() {
+                if (index !== 1) return;
+                if (mi < msgs.length) {
+                    const m = document.createElement("div");
+                    m.className = "msg";
+                    m.innerText = msgs[mi];
+                    chat.appendChild(m);
+                    mi++;
+                    chatTimer = setTimeout(flow, 1500);
+                }
+            }
+            flow();
+        }
+
+        function startGallery() {
+            const pics = ["pics/1.jpeg", "pics/2.jpeg", "pics/3.jpeg", "pics/4.jpeg", "pics/5.jpeg", "pics/6.jpeg", "pics/7.jpeg", "pics/8.jpeg"];
+            let p = 0;
+            const picEl = document.getElementById("pic");
+
+            if (galleryTimer) clearInterval(galleryTimer);
+
+            galleryTimer = setInterval(() => {
+                if (index !== 2) return;
+                p = (p + 1) % pics.length;
+                picEl.src = pics[p];
+            }, 1500);
+        }
+
+        function yesLove() {
+            Swal.fire("Yay 💖", "I knew it!", "success").then(() => next());
+        }
+
+        function run() {
+            const no = document.getElementById("no");
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * (window.innerHeight - 50);
+            no.style.left = x + "px";
+            no.style.top = y + "px";
+        }
+
+        function openRing() {
+            const ring = document.getElementById("ring");
+            const final = document.getElementById("final");
+            ring.classList.add("open");
+
+            Swal.fire({
+                title: "My Love 💍",
+                text: "Will you be mine forever?",
+                confirmButtonText: "Yes ❤️"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    final.innerHTML = "";
+                    final.style.display = "block";
+                    const note = "You are my everything ❤️ Forever and always 💕";
+                    let i = 0;
+                    function typeNote() {
+                        if (i < note.length) {
+                            final.innerHTML += note[i++];
+                            setTimeout(typeNote, 100);
+                        }
+                    }
+                    typeNote();
+
+                    for (let j = 0; j < 25; j++) {
+                        const h = document.createElement("div");
+                        h.className = "heart";
+                        h.innerHTML = "💖";
+                        h.style.left = Math.random() * 100 + "vw";
+                        h.style.top = Math.random() * 100 + "vh";
+                        document.body.appendChild(h);
+                        setTimeout(() => h.remove(), 2000);
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
